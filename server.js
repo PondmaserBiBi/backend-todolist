@@ -11,7 +11,7 @@ app.use(morgan('dev'))
 app.use(express.json())
 app.use(cors())
 
-app.use('/todo', todos)
+app.use('/', todos)
 
 
 app.listen(port, () => {
