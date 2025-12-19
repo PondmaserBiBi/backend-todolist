@@ -4,16 +4,13 @@ const cors = require('cors')
 const morgan = require('morgan')
 const todos = require('./routes/todos')
 
-const port = process.env.PORT || 5001;
+const port = process.env.PORT || 5000;
 
 // middleware
 app.use(morgan('dev'))
 app.use(express.json())
 app.use(cors())
 
+app.use('/', todos)
 
-app.use('/api', todos)
-
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`)
-})
+app.listen(port, () => console.log(`Server running on port ${port}`));
