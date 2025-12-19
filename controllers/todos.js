@@ -1,100 +1,72 @@
 const prisma = require("../config/prisma")
 
 exports.create = async (req, res) => {
-
     try {
+        const { title } = req.body
 
-        const { title, status } = req.body
+        if (!title || title.trim() === "") {
+            return res.status(400).json({ message: "Title is required" })
+        }
+
         const newTodo = await prisma.todo.create({
-
             data: {
-
-                title: title,
-                status: status
+                title: title.trim(),
+                status: false // ค่า default กัน error
             }
         })
 
         res.json(newTodo)
-
     } catch (error) {
-
-        console.log(error)
-
-        res.json({ message: 'Server Error' }).status(500)
-
+        console.error(error)
+        res.status(500).json({ message: "Server Error" })
     }
-
 }
 
 exports.list = async (req, res) => {
-
     try {
+        const todos = await prisma.todo.findMany({
+            orderBy: { id: "desc" }
+        })
 
-        const todos = await prisma.todo.findMany()
-
-        res.json({ todos })
-
+        // ✅ ส่ง array ตรง ๆ
+        res.json(todos)
     } catch (error) {
-
-        console.log(error)
-
-        res.json({ message: 'Server Error' }).status(500)
+        console.error(error)
+        res.status(500).json({ message: "Server Error" })
     }
 }
 
 exports.update = async (req, res) => {
-
     try {
-
         const { id } = req.params
         const { title, status } = req.body
 
         const updated = await prisma.todo.update({
-
-            where: {
-
-                id: Number(id)
-            },
-
+            where: { id: Number(id) },
             data: {
-                title: title,
-                status: status
+                title,
+                status
             }
         })
 
         res.json(updated)
-
     } catch (error) {
-
-        console.log(error)
-
-        res.json({ message: 'Server Error' }).status(500)
+        console.error(error)
+        res.status(500).json({ message: "Server Error" })
     }
-
 }
 
-
 exports.remove = async (req, res) => {
-
     try {
-
         const { id } = req.params
 
-        const deleted = await prisma.todo.delete({
-
-            where: {
-
-                id: Number(id)
-            }
+        await prisma.todo.delete({
+            where: { id: Number(id) }
         })
 
-        res.send(deleted)
-
+        res.json({ success: true })
     } catch (error) {
-
-        console.log(error)
-
-        res.json({ message: 'Server Error' }).status(500)
+        console.error(error)
+        res.status(500).json({ message: "Server Error" })
     }
-
 }
