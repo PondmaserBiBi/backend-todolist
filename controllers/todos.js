@@ -1,20 +1,14 @@
-const prisma = require("../config/prisma")
+const { PrismaClient } = require('@prisma/client')
+const prisma = new PrismaClient()
 
 exports.create = async (req, res) => {
     try {
         const { title } = req.body
-
-        if (!title || title.trim() === "") {
-            return res.status(400).json({ message: "Title is required" })
-        }
+        if (!title || title.trim() === "") return res.status(400).json({ message: "Title is required" })
 
         const newTodo = await prisma.todo.create({
-            data: {
-                title: title.trim(),
-                status: false // ค่า default กัน error
-            }
+            data: { title: title.trim() }
         })
-
         res.json(newTodo)
     } catch (error) {
         console.error(error)
@@ -24,12 +18,8 @@ exports.create = async (req, res) => {
 
 exports.list = async (req, res) => {
     try {
-        const todos = await prisma.todo.findMany({
-            orderBy: { id: "desc" }
-        })
-
-        // ✅ ส่ง array ตรง ๆ
-        res.json(todos)
+        const todos = await prisma.todo.findMany({ orderBy: { id: "desc" } })
+        res.json(todos)  // ⚠️ ส่ง array ตรง ๆ
     } catch (error) {
         console.error(error)
         res.status(500).json({ message: "Server Error" })
@@ -43,12 +33,8 @@ exports.update = async (req, res) => {
 
         const updated = await prisma.todo.update({
             where: { id: Number(id) },
-            data: {
-                title,
-                status
-            }
+            data: { title, status }
         })
-
         res.json(updated)
     } catch (error) {
         console.error(error)
@@ -59,11 +45,7 @@ exports.update = async (req, res) => {
 exports.remove = async (req, res) => {
     try {
         const { id } = req.params
-
-        await prisma.todo.delete({
-            where: { id: Number(id) }
-        })
-
+        await prisma.todo.delete({ where: { id: Number(id) } })
         res.json({ success: true })
     } catch (error) {
         console.error(error)
