@@ -3,9 +3,9 @@ const router = express.Router()
 
 const { create, list, update, remove } = require('../controllers/todos')
 
-router.get('/', list)
-router.post('/', create)
-router.put('/:id', update)
-router.delete('/:id', remove)
+router.get('/todo', list)
+router.post('/todo', create)
+router.put('/todo:id', update)
+router.delete('/todo:id', remove)
 
 module.exports = router
