@@ -5,7 +5,7 @@ const { create, list, update, remove } = require('../controllers/todos')
 
 router.get('/todo', list)
 router.post('/todo', create)
-router.put('/todo:id', update)
-router.delete('/todo:id', remove)
+router.put('/todo/:id', update)
+router.delete('/todo/:id', remove)
 
 module.exports = router
