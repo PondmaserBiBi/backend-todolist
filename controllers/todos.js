@@ -1,101 +1,134 @@
+const prisma = require("../config/prisma")
+
+// GET all todos
 exports.list = async (req, res) => {
     try {
+        console.log('🔍 Fetching todos...')
         const todos = await prisma.todo.findMany({
             orderBy: {
-                createdAt: 'desc' // ถ้ามีฟิลด์ createdAt
+                createdAt: 'desc'
             }
         })
 
-        // แน่ใจว่าเป็น array เสมอ
-        if (!Array.isArray(todos)) {
-            return res.status(200).json([])
-        }
-
+        console.log(`✅ Found ${todos.length} todos`)
         res.status(200).json(todos)
 
     } catch (error) {
-        console.log(error)
-        // เมื่อ error ก็ควรส่ง array ว่างกลับไป
-        res.status(500).json([])
+        console.error('❌ Error in list:', error)
+        res.status(500).json({
+            error: 'Server Error',
+            message: error.message
+        })
     }
 }
 
+// CREATE new todo
 exports.create = async (req, res) => {
     try {
+        console.log('📝 Creating new todo:', req.body)
         const { title, status } = req.body
+
+        if (!title || title.trim() === '') {
+            return res.status(400).json({
+                error: 'Validation Error',
+                message: 'Title is required'
+            })
+        }
+
         const newTodo = await prisma.todo.create({
             data: {
-                title: title,
-                status: status || false // default ถ้าไม่ส่งมา
+                title: title.trim(),
+                status: status || false
             }
         })
 
-        res.status(201).json(newTodo) // 201 Created
+        console.log('✅ Created todo:', newTodo)
+        res.status(201).json(newTodo)
 
     } catch (error) {
-        console.log(error)
+        console.error('❌ Error in create:', error)
         res.status(500).json({
             error: 'Server Error',
-            details: error.message
+            message: error.message
         })
     }
 }
 
+// UPDATE todo
 exports.update = async (req, res) => {
     try {
+        console.log('✏️ Updating todo:', req.params.id, req.body)
         const { id } = req.params
         const { title, status } = req.body
 
+        if (!title || title.trim() === '') {
+            return res.status(400).json({
+                error: 'Validation Error',
+                message: 'Title is required'
+            })
+        }
+
         const updated = await prisma.todo.update({
             where: {
-                id: Number(id)
+                id: parseInt(id)
             },
             data: {
-                title: title,
+                title: title.trim(),
                 status: status
             }
         })
 
+        console.log('✅ Updated todo:', updated)
         res.status(200).json(updated)
 
     } catch (error) {
-        console.log(error)
-        // ถ้าไม่พบ todo
+        console.error('❌ Error in update:', error)
+
         if (error.code === 'P2025') {
             return res.status(404).json({
-                error: 'Todo not found'
+                error: 'Not Found',
+                message: 'Todo not found'
             })
         }
+
         res.status(500).json({
             error: 'Server Error',
-            details: error.message
+            message: error.message
         })
     }
 }
 
+// DELETE todo
 exports.remove = async (req, res) => {
     try {
+        console.log('🗑️ Deleting todo:', req.params.id)
         const { id } = req.params
 
         const deleted = await prisma.todo.delete({
             where: {
-                id: Number(id)
+                id: parseInt(id)
             }
         })
 
-        res.status(200).json(deleted)
+        console.log('✅ Deleted todo:', deleted)
+        res.status(200).json({
+            message: 'Todo deleted successfully',
+            todo: deleted
+        })
 
     } catch (error) {
-        console.log(error)
-        // ถ้าไม่พบ todo
+        console.error('❌ Error in delete:', error)
+
         if (error.code === 'P2025') {
             return res.status(404).json({
-                error: 'Todo not found'
+                error: 'Not Found',
+                message: 'Todo not found'
             })
         }
+
         res.status(500).json({
             error: 'Server Error',
-            details: error.message
+            message: error.message
         })
     }
 }
